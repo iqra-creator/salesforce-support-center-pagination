@@ -1,12 +1,24 @@
-public class SupportTicketController {
+public with sharing class SupportTicketController {
 
-    @AuraEnabled
-    public static List<Case> fetchTickets(Integer limitSize, Integer offsetSize) {
+    /*
+     * Fetches paginated Case records for Support Center UI.
+     * Designed to efficiently handle large datasets.
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<Case> getTickets(Integer pageSize, Integer pageNumber) {
+
+        if (pageSize == null || pageNumber == null) {
+            return new List<Case>();
+        }
+
+        Integer offsetValue = (pageNumber - 1) * pageSize;
+
         return [
-            SELECT Id, Subject, Status
+            SELECT Id, Subject, Status, Priority, CreatedDate
             FROM Case
             ORDER BY CreatedDate DESC
-            LIMIT :limitSize OFFSET :offsetSize
+            LIMIT :pageSize
+            OFFSET :offsetValue
         ];
     }
 }
